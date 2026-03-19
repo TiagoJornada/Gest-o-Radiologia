@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gestão do Setor - UDI</title>
+<style>
+:root {
+  --bg:#f4f7fb; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --line:#d9e2ec;
+  --primary:#0f4c81; --primary2:#2563eb; --ok:#0f766e; --warn:#b45309; --danger:#b91c1c;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); }
+header { background:linear-gradient(135deg,var(--primary),var(--primary2)); color:#fff; padding:22px 18px; }
+header h1 { margin:0; font-size:24px; }
+header p { margin:6px 0 0; opacity:.92; }
+.container { max-width:1320px; margin:0 auto; padding:18px; }
+.tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.tab-btn { border:none; background:#e8eef6; color:#123; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700; }
+.tab-btn.active { background:var(--primary); color:#fff; }
+.tab { display:none; }
+.tab.active { display:block; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:0 8px 24px rgba(16,24,40,.06); padding:16px; margin-bottom:16px; }
+.grid { display:grid; gap:12px; }
+.grid-2 { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+.grid-3 { grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+.grid-4 { grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); }
+label { display:block; font-size:13px; font-weight:700; margin-bottom:6px; color:#334155; }
+input, select, textarea { width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; font-size:14px; }
+textarea { min-height:88px; resize:vertical; }
+button { border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer; }
+button.primary { background:var(--primary); color:#fff; }
+button.secondary { background:#e2e8f0; color:#0f172a; }
+button.warn { background:#fff7ed; color:var(--warn); border:1px solid #fdba74; }
+button.danger { background:#fef2f2; color:var(--danger); border:1px solid #fca5a5; }
+.actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.small { font-size:12px; color:var(--muted); }
+.status { margin-top:10px; padding:10px 12px; border-radius:10px; display:none; }
+.status.show { display:block; }
+.status.ok { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+.status.error { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+.table-wrap { overflow:auto; }
+table { width:100%; border-collapse:collapse; min-width:980px; }
+th, td { border:1px solid #dbe4ee; padding:8px 10px; text-align:left; vertical-align:top; }
+th { background:#eff6ff; }
+.badge { display:inline-block; padding:4px 8px; border-radius:999px; background:#e0f2fe; color:#075985; font-size:12px; font-weight:700; }
+.list-box { max-height:420px; overflow:auto; border:1px solid var(--line); border-radius:12px; padding:8px; background:#fafcff; }
+.list-item { display:flex; justify-content:space-between; gap:12px; padding:8px; border-bottom:1px solid #edf2f7; }
+.list-item:last-child { border-bottom:none; }
+.hidden { display:none!important; }
+.kpi { padding:14px; border-radius:14px; background:#f8fafc; border:1px solid #e2e8f0; }
+.kpi strong { display:block; font-size:24px; }
+.panel-title { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.notice { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Gestão do Setor - UDI</h1>
+  <p>Inclusão de pedidos, consulta individual, equipe, escalas e rastreabilidade administrativa.</p>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="registro">Inclusão de pedido</button>
+    <button class="tab-btn" data-tab="solicitacoes">Consulta por pessoa</button>
+    <button class="tab-btn" data-tab="escala">Escalas</button>
+    <button class="tab-btn" data-tab="equipe">Equipe do setor</button>
+    <button class="tab-btn" data-tab="admin">Administração</button>
+  </div>
+
+  <section id="registro" class="tab active">
+    <div class="card">
+      <h2>Novo pedido</h2>
+      <div class="grid grid-2">
+        <div>
+          <label>Servidor</label>
+          <select id="servidorSelect"></select>
+        </div>
+        <div>
+          <label>Cargo</label>
+          <input id="cargoAuto" readonly />
+        </div>
+        <div>
+          <label>E-mail do servidor</label>
+          <input id="emailServidor" type="email" placeholder="nome@exemplo.com" />
+        </div>
+        <div>
+          <label>Tipo de ocorrência</label>
+          <select id="tipoOcorrencia">
+            <option>Abono</option>
+            <option>Férias</option>
+            <option>Licença</option>
+            <option>Afastamento</option>
+            <option>Gala</option>
+            <option>Casamento</option>
+            <option>Congresso</option>
+            <option>Curso</option>
+            <option>Folga</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label>Local de trabalho previsto</label>
+          <select id="localTrabalho"></select>
+        </div>
+        <div>
+          <label>Turno</label>
+          <select id="turno">
+            <option>Manhã</option>
+            <option>Tarde</option>
+            <option>Noite</option>
+            <option>Integral</option>
+          </select>
+        </div>
+        <div>
+          <label>Data inicial</label>
+          <input type="date" id="dataInicial" />
+        </div>
+        <div>
+          <label>Data final</label>
+          <input type="date" id="dataFinal" />
+        </div>
+        <div>
+          <label>Substituição / cobertura</label>
+          <input id="cobertura" placeholder="Opcional" />
+        </div>
+        <div>
+          <label>Localizador do pedido</label>
+          <input id="codigoPedido" readonly />
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <label>Observações</label>
+        <textarea id="observacoes" placeholder="Detalhes adicionais, número do processo, justificativa, etc."></textarea>
+      </div>
+      <div class="actions">
+        <button class="primary" id="btnSalvarRegistro">Salvar pedido</button>
+        <button class="secondary" id="btnEnviarEmail">Salvar e abrir e-mail</button>
+        <button class="secondary" id="btnLimparRegistro">Limpar</button>
+      </div>
+      <div class="small">
+        A primeira aba serve apenas para inclusão. A consulta completa por pessoa fica na aba <b>Consulta por pessoa</b>.
+        O e-mail é aberto no programa de e-mail do computador, com cópia para <b>jornadatiagopessoal@gmail.com</b>.
+      </div>
+      <div id="statusRegistro" class="status"></div>
+    </div>
+  </section>
+
+  <section id="solicitacoes" class="tab">
+    <div class="card">
+      <div class="panel-title">
+        <h2>Pedidos por pessoa</h2>
+        <span class="badge">Visualização completa</span>
+      </div>
+      <div class="grid grid-3">
+        <div>
+          <label>Servidor</label>
+          <select id="filtroServidorSolicitacoes"></select>
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="filtroStatusSolicitacoes">
+            <option value="">Todos</option>
+            <option>Ativo</option>
+            <option>Alterado</option>
+            <option>Excluído</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:end;">
+          <button class="secondary" id="btnAtualizarSolicitacoes">Atualizar consulta</button>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:12px;">
+        <table id="tabelaSolicitacoesPessoa">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Data/Hora</th>
+              <th>Ocorrência</th>
+              <th>Período</th>
+              <th>Turno</th>
+              <th>Local</th>
+              <th>Status</th>
+              <th>E-mail</th>
+              <th>Observações</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="statusSolicitacoes" class="status"></div>
+    </div>
+  </section>
+
+  <section id="escala" class="tab">
+    <div class="card">
+      <div class="grid grid-3">
+        <div>
+          <label>Semana / referência</label>
+          <input id="escalaReferencia" placeholder="Ex.: Semana padrão 2026" />
+        </div>
+        <div>
+          <label>Turno</label>
+          <select id="filtroTurnoEscala">
+            <option>Manhã</option>
+            <option>Tarde</option>
+          </select>
+        </div>
+        <div>
+          <label>Dia</label>
+          <select id="filtroDiaEscala"></select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="secondary" id="btnRenderEscala">Atualizar visualização</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Escala do dia</h2>
+      <div class="table-wrap">
+        <table id="tabelaEscalaDia">
+          <thead>
+            <tr><th>Servidor</th><th>Cargo</th><th>Local / atividade</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resumo semanal</h2>
+      <div class="table-wrap">
+        <table id="tabelaResumoSemanal">
+          <thead>
+            <tr><th>Dia</th><th>Manhã</th><th>Tarde</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="equipe" class="tab">
+    <div class="card">
+      <div class="grid grid-3">
+        <div class="kpi"><span class="small">Total de servidores</span><strong id="kpiTotal"></strong></div>
+        <div class="kpi"><span class="small">Médicos</span><strong id="kpiMedicos"></strong></div>
+        <div class="kpi"><span class="small">Demais cargos</span><strong id="kpiDemais"></strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="grid grid-2">
+        <div>
+          <label>Buscar servidor</label>
+          <input id="buscaEquipe" placeholder="Digite o nome..." />
+        </div>
+        <div>
+          <label>Filtrar por cargo</label>
+          <select id="filtroCargoEquipe"></select>
+        </div>
+      </div>
+      <div class="list-box" id="listaEquipe" style="margin-top:12px;"></div>
+    </div>
+  </section>
+
+  <section id="admin" class="tab">
+    <div class="card" id="blocoLoginAdmin">
+      <h2>Painel administrativo</h2>
+      <p class="small">Somente o gestor altera escala, inclui ou remove servidores e acompanha os indicadores de acesso e inclusão.</p>
+      <div class="grid grid-2">
+        <div>
+          <label>Senha administrativa</label>
+          <input type="password" id="senhaAdmin" placeholder="Digite a senha" />
+        </div>
+        <div style="display:flex;align-items:end;">
+          <button class="primary" id="btnEntrarAdmin">Entrar</button>
+        </div>
+      </div>
+      <div id="statusAdminLogin" class="status"></div>
+    </div>
+
+    <div class="hidden" id="painelAdminConteudo">
+      <div class="card">
+        <div class="actions">
+          <button class="warn" id="btnSairAdmin">Sair do modo administrador</button>
+          <button class="secondary" id="btnSalvarTudo">Salvar equipe e escala</button>
+        </div>
+        <div id="statusAdminSalvar" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h3>Indicadores de acesso e inclusão</h3>
+        <div class="grid grid-4">
+          <div class="kpi"><span class="small">Acessos admin</span><strong id="kpiAcessosAdmin">0</strong></div>
+          <div class="kpi"><span class="small">Inclusões totais</span><strong id="kpiInclusoes">0</strong></div>
+          <div class="kpi"><span class="small">Alterações</span><strong id="kpiAlteracoes">0</strong></div>
+          <div class="kpi"><span class="small">Exclusões</span><strong id="kpiExclusoes">0</strong></div>
+        </div>
+        <div class="grid grid-3" style="margin-top:12px;">
+          <div>
+            <label>Período inicial</label>
+            <input type="date" id="adminPeriodoInicio" />
+          </div>
+          <div>
+            <label>Período final</label>
+            <input type="date" id="adminPeriodoFim" />
+          </div>
+          <div style="display:flex;align-items:end;">
+            <button class="secondary" id="btnAplicarPeriodoAdmin">Aplicar período</button>
+          </div>
+        </div>
+        <div class="notice" style="margin-top:12px;">
+          <b>Observação:</b> os indicadores rastreiam acessos administrativos e movimentações feitas neste navegador.
+          Para auditoria centralizada entre vários computadores, depois eu posso ligar isso à planilha Google.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Equipe do setor</h3>
+        <div class="grid grid-3">
+          <div><label>Nome</label><input id="novoNome" /></div>
+          <div><label>Cargo</label><input id="novoCargo" placeholder="Ex.: Médico, Técnico em Radiologia..." /></div>
+          <div style="display:flex;align-items:end;"><button class="primary" id="btnAdicionarServidor">Adicionar servidor</button></div>
+        </div>
+        <div class="table-wrap" style="margin-top:12px;">
+          <table id="tabelaAdminEquipe">
+            <thead><tr><th>Nome</th><th>Cargo</th><th>Ação</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Editar escala</h3>
+        <div class="grid grid-3">
+          <div><label>Turno</label><select id="adminTurno"></select></div>
+          <div><label>Dia</label><select id="adminDia"></select></div>
+          <div><label>Servidor</label><select id="adminServidor"></select></div>
+          <div><label>Local / atividade</label><input id="adminLocal" placeholder="Ex.: Ultrassom - Geral" /></div>
+          <div style="display:flex;align-items:end;"><button class="primary" id="btnAdicionarEscala">Adicionar na escala</button></div>
+        </div>
+        <div class="table-wrap" style="margin-top:12px;">
+          <table id="tabelaAdminEscala">
+            <thead><tr><th>Servidor</th><th>Cargo</th><th>Local / atividade</th><th>Ação</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const ADMIN_PASSWORD = "Grudos@903";
+const COPY_EMAIL = "jornadatiagopessoal@gmail.com";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbySH0caorcORifoP3oPrKm2zfvyvwZH6QuXP__Cdw2VHE1vlvqvxh9adxSAI14Du-CS/exec";
+const STORAGE_KEY = "udi_setor_config_v2";
+const REGISTROS_KEY = "udi_setor_registros_local_v2";
+const ACCESS_KEY = "udi_setor_access_log_v2";
+
+const DEFAULT_DATA = {
+  referenciaEscala: "Semana padrão 2026",
+  employees: [{"nome": "Adenilson Jose De Santana Lira", "cargo": "Tecnico Em Radiologia"}, {"nome": "Adrius Beltrao Burgos", "cargo": "Tecnico Em Radiologia"}, {"nome": "Alcineide Moraes Da Fonseca", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Aldo Jose Alves Barbosa", "cargo": "Tecnico Em Radiologia"}, {"nome": "Alessandro Ramos Da Silva", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Alexandra Cavalcanti De Freitas", "cargo": "Medico"}, {"nome": "Aline Lopes Garcia Leal", "cargo": "Medico"}, {"nome": "Allisson Francisco De Morais", "cargo": "Enfermeiro"}, {"nome": "Amaro Bezerra De Lima Filho", "cargo": "Tecnico Em Radiologia"}, {"nome": "Ana Carina Brito Cruz", "cargo": "Enfermeiro"}, {"nome": "Ana Elizabeth Pereira Tejo", "cargo": "Tecnico Em Radiologia"}, {"nome": "Ana Karina Brizeno Ferreira Lopes", "cargo": "Medico"}, {"nome": "Analia Maria De Arruda Neri", "cargo": "Tecnico Em Radiologia"}, {"nome": "Andre Do Nascimento Cardoso", "cargo": "Tecnico Em Radiologia"}, {"nome": "Andrea Bezerra De Andrade", "cargo": "Tecnico Em Radiologia"}, {"nome": "Andrea Lira Da Silva Bezerra", "cargo": "Tecnico Em Radiologia"}, {"nome": "Antonio Augusto Silva Oliveira", "cargo": "Fisico"}, {"nome": "Bruna Rayane Guimaraes Macaneiro", "cargo": "Medico"}, {"nome": "Bruno Cesar Batista Da Silva", "cargo": "Medico"}, {"nome": "Bruno De Souza Nogueira", "cargo": "Tecnico Em Radiologia"}, {"nome": "Bruno Perez Guedes Pereira", "cargo": "Medico"}, {"nome": "Bruno Vasconcellos Vinhas", "cargo": "Tecnico Em Radiologia"}, {"nome": "Celso De Oliveira Junior", "cargo": "Tecnico Em Radiologia"}, {"nome": "Cibele Gondim Coelho", "cargo": "Enfermeiro"}, {"nome": "Cicero Jose Lira", "cargo": "Assistente Administrativo"}, {"nome": "Cicilia Fraga Rocha Pontes Fernandez", "cargo": "Medico"}, {"nome": "Cristiane Da Silva Van Der Linden", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Cristiane Pereira Barros", "cargo": "Enfermeiro"}, {"nome": "Daniela Beltrao Magalhaes Cavalcanti", "cargo": "Medico"}, {"nome": "Demetrio Lubambo De Amorim", "cargo": "Medico"}, {"nome": "Denis Jose De Lima", "cargo": "Tecnico Em Radiologia"}, {"nome": "Domingos Maria Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Eduardo Ferreira Barros", "cargo": "Tecnico Em Radiologia"}, {"nome": "Eduardo Just Da Costa E Silva", "cargo": "Medico"}, {"nome": "Eduardo Silva Bezerra", "cargo": "Medico"}, {"nome": "Eliana Kelly Dos Santos Chagas", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Eliane Dos Santos Nunes", "cargo": "Enfermeiro"}, {"nome": "Eline Cristina Lino De Azevedo", "cargo": "Tecnico Em Radiologia"}, {"nome": "Estelita Tinoco Branco De Albuquerque", "cargo": "Medico"}, {"nome": "Fabiana Oliveira Farias Viana", "cargo": "Medico"}, {"nome": "Felipe Alves Mourato", "cargo": "Medico"}, {"nome": "George Misael Ferreira De Santana", "cargo": "Farmaceutico"}, {"nome": "Geovane Sergio Correia Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Gilberto Alves De Lira Filho", "cargo": "Tecnico Em Radiologia"}, {"nome": "Gilvaneide Maria Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Hugo De Souza Lemos", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Igor Lucio Dantas Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Irani Costa Dos Santos", "cargo": "Tecnico Em Radiologia"}, {"nome": "Isandro Gilton De Oliveira", "cargo": "Tecnico Em Radiologia"}, {"nome": "Ivanei Alves Brito", "cargo": "Tecnico Em Radiologia"}, {"nome": "Jandilene Maria De Freitas Sucupira", "cargo": "Medico"}, {"nome": "Jaqueline Santos Do Nascimento Burgos", "cargo": "Tecnico Em Radiologia"}, {"nome": "Joao Batista De Vasconcelos Neto", "cargo": "Tecnico Em Radiologia"}, {"nome": "Joao Ferreira Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Jose Ferreira Das Gracas Neto", "cargo": "Tecnico Em Radiologia"}, {"nome": "Julia Maria Alves Fernandes", "cargo": "Enfermeiro"}, {"nome": "Jussara Cassandra Morais Cavalcanti", "cargo": "Tecnico Em Radiologia"}, {"nome": "Laecio Leitao Batista", "cargo": "Medico"}, {"nome": "Levy Oliveira Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Luciano Roberto Freitas Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Luiz Xavier Da Rocha Junior", "cargo": "Tecnico Em Radiologia"}, {"nome": "Luziany Carvalho Araujo", "cargo": "Medico"}, {"nome": "Madja Maria Pereira Rosa", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Manasses Goncalves De Santana", "cargo": "Tecnico Em Radiologia"}, {"nome": "Marcia Maria Freire Paes De Andrade", "cargo": "Medico"}, {"nome": "Marcilon Felix De Araujo", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Maria Cristina Soares De Souza", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Maria Eduarda Duarte De Mello Flamini", "cargo": "Medico"}, {"nome": "Mariana Vila Nova De Oliveira Pontual", "cargo": "Medico"}, {"nome": "Marinete De Almeida Santos Pires", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Mario Genuino Dourado Filho", "cargo": "Medico"}, {"nome": "Mirela Seabra Melo Correia", "cargo": "Medico"}, {"nome": "Mirella Coutinho Damasceno Leal", "cargo": "Enfermeiro"}, {"nome": "Monica Maranhao Da Silva", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Nadja Francisca E Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Nadja Rolim Goncalves De Alencar", "cargo": "Medico"}, {"nome": "Nara Gabriel Nigro Rocha", "cargo": "Enfermeiro"}, {"nome": "Nataly Andrade Alves De Paiva", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Nivaneide Atanasio Veras Lemos", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Osman Izidio Da Silva", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Paulo Sergio Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Rachel De Oliveira Brito Ximenes", "cargo": "Medico"}, {"nome": "Rafael Lauriano Da Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Rainier Luz Reis", "cargo": "Medico"}, {"nome": "Regina Celi De Holanda Marinho", "cargo": "Medico"}, {"nome": "Renata Cardoso Martins Gomes", "cargo": "Medico"}, {"nome": "Renata Perazzo De Carvalho", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Renato Goncalves Barreto", "cargo": "Tecnico Em Radiologia"}, {"nome": "Rivoziane Teixeira Da Costa", "cargo": "Tecnico Em Radiologia"}, {"nome": "Roberto Rodrigues Dos Santos", "cargo": "Tecnico Em Radiologia"}, {"nome": "Rodrigo Rodrigues De Sousa Moura", "cargo": "Medico"}, {"nome": "Romina Micheli", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Rosemary Tavares Diogo", "cargo": "Auxiliar De Enfermagem"}, {"nome": "Rosineide Melo Da Silva", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Saulo Goncalves Lins Filho", "cargo": "Tecnico Em Radiologia"}, {"nome": "Sergio Luiz Pereira De Lira Junior", "cargo": "Tecnico Em Radiologia"}, {"nome": "Severina Gomes De Araujo", "cargo": "Tecnico Em Saude"}, {"nome": "Silvania Carla Gomes", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Simone Cristina Soares Brandao", "cargo": "Medico"}, {"nome": "Solange Maria Silva Santana", "cargo": "Tecnico Em Enfermagem"}, {"nome": "Sterphani Pavao Meireles De Castro", "cargo": "Enfermeiro"}, {"nome": "Symone Margareth Braga Rodrigues De Melo", "cargo": "Enfermeiro"}, {"nome": "Tatiana Fortaleza Arraes De Carvalho", "cargo": "Medico"}, {"nome": "Thais Ramos Da Costa", "cargo": "Medico"}, {"nome": "Thiago Gustavo De Sena", "cargo": "Tecnico Em Radiologia"}, {"nome": "Thiago William De Santana Silva", "cargo": "Tecnico Em Radiologia"}, {"nome": "Valerio Silva Dos Santos", "cargo": "Tecnico Em Radiologia"}, {"nome": "Vinicius De Oliveira Menezes", "cargo": "Fisico"}, {"nome": "Viviany De Fatima Brito Barbosa", "cargo": "Enfermeiro"}],
+  scale: {"Manhã": {"Segunda": [["Eduardo Silva Bezerra", "Ultrassom - Doppler"], ["Fabiana Oliveira Farias Viana", "Ultrassom - Geral"], ["Regina Celi De Holanda Marinho", "Ultrassom - Geral"], ["Mirela Seabra Melo Correia", "Ultrassom - Biópsia"], ["Daniela Beltrao Magalhaes Cavalcanti", "Laudo"], ["Mariana Vila Nova De Oliveira Pontual", "Tomografia/Ressonância"], ["Jandilene Maria De Freitas Sucupira", "Tomografia/Ressonância"], ["Nadja Rolim Goncalves De Alencar", "RX contrastado"]], "Terça": [["Rachel De Oliveira Brito Ximenes", "Ultrassom - Geral"], ["Eduardo Just Da Costa E Silva", "Ultrassom - Berçário/Pediatria"], ["Ana Karina Brizeno Ferreira Lopes", "Ultrassom - Biópsia"], ["Renata Cardoso Martins Gomes", "Ultrassom - Articulações"], ["Bruna Rayane Guimaraes Macaneiro", "Ultrassom"], ["Eduardo Silva Bezerra", "Tomografia/Ressonância"], ["Tatiana Fortaleza Arraes De Carvalho", "Tomografia/Ressonância"], ["Regina Celi De Holanda Marinho", "Tomografia/Ressonância"], ["Luziany Carvalho Araujo", "Tomografia/Ressonância"], ["Cicilia Fraga Rocha Pontes Fernandez", "RX contrastado - Histero"], ["Mirela Seabra Melo Correia", "Mamografia"]], "Quarta": [["Bruno Perez Guedes Pereira", "Ultrassom - Articulações"], ["Jandilene Maria De Freitas Sucupira", "Ultrassom - Geral"], ["Mirela Seabra Melo Correia", "Ultrassom"], ["Mario Genuino Dourado Filho", "Tomografia/Ressonância/Neuro"], ["Tatiana Fortaleza Arraes De Carvalho", "Tomografia/Ressonância"], ["Daniela Beltrao Magalhaes Cavalcanti", "RX contrastado"], ["Eduardo Silva Bezerra", "PET/CT"], ["Fabiana Oliveira Farias Viana", "Mamografia"]], "Quinta": [["Rainier Luz Reis", "Ultrassom - Geral/Obstétrico"], ["Ana Karina Brizeno Ferreira Lopes", "Ultrassom - Biópsia"], ["Regina Celi De Holanda Marinho", "Ultrassom - Geral/Obstétrico"], ["Bruna Rayane Guimaraes Macaneiro", "Ultrassom"], ["Rodrigo Rodrigues De Sousa Moura", "Ultrassom"], ["Cicilia Fraga Rocha Pontes Fernandez", "Tomografia/Ressonância"], ["Mariana Vila Nova De Oliveira Pontual", "Tomografia/Ressonância"], ["Renata Cardoso Martins Gomes", "Tomografia/Ressonância"], ["Thais Ramos Da Costa", "Tomografia/Ressonância"], ["Daniela Beltrao Magalhaes Cavalcanti", "RX contrastado"], ["Nadja Rolim Goncalves De Alencar", "RX contrastado"], ["Eduardo Just Da Costa E Silva", "RX contrastado"], ["Bruno Cesar Batista Da Silva", "Supervisão/Responsável"]], "Sexta": [["Eduardo Silva Bezerra", "Ultrassom - Articulações"], ["Rainier Luz Reis", "Ultrassom - Geral"], ["Demetrio Lubambo De Amorim", "Ultrassom - Doppler"], ["Bruno Perez Guedes Pereira", "Tomografia/Ressonância/MSK"], ["Thais Ramos Da Costa", "Tomografia/Ressonância"], ["Luziany Carvalho Araujo", "Tomografia/Ressonância"]], "Sábado": [["Rodrigo Rodrigues De Sousa Moura", "Laudo/Ultrassom - Geral"]]}, "Tarde": {"Segunda": [["Mariana Vila Nova De Oliveira Pontual", "Ultrassom - Geral"], ["Eduardo Just Da Costa E Silva", "Ultrassom - Berçário/Pediatria"], ["Demetrio Lubambo De Amorim", "Ultrassom - Geral"], ["Regina Celi De Holanda Marinho", "Ultrassom - Biópsia"], ["Mario Genuino Dourado Filho", "Tomografia/Ressonância/Neuro"], ["Jandilene Maria De Freitas Sucupira", "Tomografia/Ressonância/Neuro"], ["Thais Ramos Da Costa", "Tomografia/Ressonância"], ["Daniela Beltrao Magalhaes Cavalcanti", "Densitometria"], ["Bruno Cesar Batista Da Silva", "PET/CT"], ["Fabiana Oliveira Farias Viana", "Mamografia"]], "Terça": [["Demetrio Lubambo De Amorim", "Ultrassom - Biópsia"], ["Tatiana Fortaleza Arraes De Carvalho", "Ultrassom - Geral"], ["Rachel De Oliveira Brito Ximenes", "Ultrassom"], ["Rodrigo Rodrigues De Sousa Moura", "Ultrassom"], ["Renata Cardoso Martins Gomes", "Tomografia/Ressonância/MSK"], ["Rainier Luz Reis", "Tomografia/Ressonância"], ["Cicilia Fraga Rocha Pontes Fernandez", "Tomografia/Ressonância"], ["Luziany Carvalho Araujo", "Tomografia/Ressonância"], ["Ana Karina Brizeno Ferreira Lopes", "Densitometria"]], "Quarta": [["Fabiana Oliveira Farias Viana", "Mamografia"], ["Jandilene Maria De Freitas Sucupira", "Ultrassom - Geral"], ["Tatiana Fortaleza Arraes De Carvalho", "Ultrassom - Geral"], ["Mario Genuino Dourado Filho", "Tomografia/Ressonância/Neuro"], ["Bruno Perez Guedes Pereira", "Tomografia/Ressonância/MSK"], ["Bruno Cesar Batista Da Silva", "Tomografia/Ressonância"]], "Quinta": [["Eduardo Just Da Costa E Silva", "Ultrassom - Berçário/Pediatria"], ["Cicilia Fraga Rocha Pontes Fernandez", "Ultrassom - Saúde da Mulher"], ["Mirela Seabra Melo Correia", "Ultrassom - Biópsia"], ["Bruna Rayane Guimaraes Macaneiro", "Ultrassom"], ["Bruno Cesar Batista Da Silva", "Tomografia/Ressonância"], ["Regina Celi De Holanda Marinho", "Tomografia/Ressonância"], ["Renata Cardoso Martins Gomes", "Tomografia/Ressonância"], ["Rodrigo Rodrigues De Sousa Moura", "Tomografia/Ressonância"], ["Mario Genuino Dourado Filho", "RX contrastado"], ["Rachel De Oliveira Brito Ximenes", "Mamografia"]], "Sexta": [["Demetrio Lubambo De Amorim", "Ultrassom - Geral"], ["Thais Ramos Da Costa", "Ultrassom"], ["Bruna Rayane Guimaraes Macaneiro", "Ultrassom"], ["Regina Celi De Holanda Marinho", "Ultrassom"], ["Bruno Perez Guedes Pereira", "Tomografia/Ressonância"], ["Luziany Carvalho Araujo", "Tomografia/Ressonância"], ["Rainier Luz Reis", "Tomografia/Ressonância"], ["Regina Celi De Holanda Marinho", "Tomografia/Ressonância"]], "Sábado": []}}
+};
+
+const LOCAIS_TRABALHO = ["Ultrassom", "Tomografia", "Ressonância", "Densitometria", "RX contrastado", "PET/CT", "Medicina Nuclear", "Iodo Terapia", "Mamografia", "Laudo", "Gestão", "Folga", "Férias", "Licença", "Afastamento"];
+
+let state = loadState();
+let registros = loadRegistros();
+let acessos = loadAcessos();
+let adminLogado = false;
+let registroEditandoId = null;
+
+const byId = (id) => document.getElementById(id);
+
+async function postToWebApp(payload) {
+  const response = await fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  });
+  return await response.json();
+}
+
+function structuredCloneSafe(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return structuredCloneSafe(DEFAULT_DATA);
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      referenciaEscala: parsed.referenciaEscala || DEFAULT_DATA.referenciaEscala,
+      employees: Array.isArray(parsed.employees) ? parsed.employees : structuredCloneSafe(DEFAULT_DATA.employees),
+      scale: parsed.scale || structuredCloneSafe(DEFAULT_DATA.scale),
+    };
+  } catch (e) {
+    return structuredCloneSafe(DEFAULT_DATA);
+  }
+}
+function saveStateLocal() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function loadRegistros() {
+  try { return JSON.parse(localStorage.getItem(REGISTROS_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function saveRegistros() { localStorage.setItem(REGISTROS_KEY, JSON.stringify(registros.slice(0, 1000))); }
+
+function loadAcessos() {
+  try { return JSON.parse(localStorage.getItem(ACCESS_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function saveAcessos() { localStorage.setItem(ACCESS_KEY, JSON.stringify(acessos.slice(0, 2000))); }
+
+function logEvento(tipo, extra={}) {
+  acessos.push({
+    tipo,
+    dataISO: new Date().toISOString(),
+    dataLocal: new Date().toLocaleString("pt-BR"),
+    ...extra
+  });
+  saveAcessos();
+}
+
+function showStatus(el, msg, ok=true) {
+  el.textContent = msg;
+  el.className = "status show " + (ok ? "ok" : "error");
+}
+function clearStatus(el) { el.textContent = ""; el.className = "status"; }
+
+function fillSelectOptions() {
+  const servidorSel = byId("servidorSelect");
+  const adminServidor = byId("adminServidor");
+  const filtroServidorSolic = byId("filtroServidorSolicitacoes");
+  const filtroDia = byId("filtroDiaEscala");
+  const adminDia = byId("adminDia");
+  const adminTurno = byId("adminTurno");
+  const filtroCargo = byId("filtroCargoEquipe");
+  const localSel = byId("localTrabalho");
+
+  const sortedEmployees = state.employees.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
+  [servidorSel, adminServidor, filtroServidorSolic].forEach(sel => {
+    const current = sel.value;
+    sel.innerHTML = sortedEmployees.map(emp => `<option ${emp.nome===current ? 'selected' : ''}>${emp.nome}</option>`).join("");
+  });
+
+  [filtroDia, adminDia].forEach(sel => {
+    const current = sel.value;
+    sel.innerHTML = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map(d => `<option ${d===current ? 'selected' : ''}>${d}</option>`).join("");
+  });
+
+  adminTurno.innerHTML = ["Manhã","Tarde"].map(t => `<option>${t}</option>`).join("");
+  localSel.innerHTML = LOCAIS_TRABALHO.map(t => `<option>${t}</option>`).join("");
+  const cargos = ["Todos", ...new Set(state.employees.map(e => e.cargo).sort((a,b)=>a.localeCompare(b)) )];
+  filtroCargo.innerHTML = cargos.map(c => `<option>${c}</option>`).join("");
+
+  byId("escalaReferencia").value = state.referenciaEscala || "";
+  syncCargoAuto();
+  syncEmailAuto();
+}
+
+function syncCargoAuto() {
+  const nome = byId("servidorSelect").value;
+  const emp = state.employees.find(e => e.nome === nome);
+  byId("cargoAuto").value = emp ? emp.cargo : "";
+}
+function syncEmailAuto() {
+  const nome = byId("servidorSelect").value;
+  const reg = registros.slice().reverse().find(r => r.nome === nome && r.emailServidor);
+  byId("emailServidor").value = reg ? reg.emailServidor : "";
+}
+
+function getCargo(nome) {
+  return state.employees.find(e => e.nome === nome)?.cargo || "";
+}
+
+function renderEquipe() {
+  byId("kpiTotal").textContent = state.employees.length;
+  const med = state.employees.filter(e => e.cargo.toLowerCase().includes("medico")).length;
+  byId("kpiMedicos").textContent = med;
+  byId("kpiDemais").textContent = state.employees.length - med;
+
+  const busca = byId("buscaEquipe").value.trim().toLowerCase();
+  const cargo = byId("filtroCargoEquipe").value;
+  const lista = state.employees
+    .filter(e => (!busca || e.nome.toLowerCase().includes(busca)) && (cargo === "Todos" || e.cargo === cargo))
+    .sort((a,b)=>a.nome.localeCompare(b.nome));
+
+  byId("listaEquipe").innerHTML = lista.map(emp => `
+    <div class="list-item">
+      <div>
+        <strong>${emp.nome}</strong><br/>
+        <span class="small">${emp.cargo}</span>
+      </div>
+      <span class="badge">${emp.cargo}</span>
+    </div>
+  `).join("") || '<div class="small">Nenhum servidor encontrado.</div>';
+}
+
+function renderEscalaDia() {
+  const turno = byId("filtroTurnoEscala").value;
+  const dia = byId("filtroDiaEscala").value;
+  const rows = (((state.scale||{})[turno]||{})[dia]||[]).slice();
+  const tbody = byId("tabelaEscalaDia").querySelector("tbody");
+  tbody.innerHTML = rows.map(([nome,local]) => `
+    <tr><td>${nome}</td><td>${getCargo(nome)}</td><td>${local}</td></tr>
+  `).join("") || '<tr><td colspan="3">Nenhuma escala cadastrada.</td></tr>';
+}
+
+function renderResumoSemanal() {
+  const tbody = byId("tabelaResumoSemanal").querySelector("tbody");
+  tbody.innerHTML = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map(dia => {
+    const m = (((state.scale||{})["Manhã"]||{})[dia]||[]).map(r => `${r[0]} – ${r[1]}`).join("<br>");
+    const t = (((state.scale||{})["Tarde"]||{})[dia]||[]).map(r => `${r[0]} – ${r[1]}`).join("<br>");
+    return `<tr><td><strong>${dia}</strong></td><td>${m || "-"}</td><td>${t || "-"}</td></tr>`;
+  }).join("");
+}
+
+function renderAdminEquipe() {
+  const tbody = byId("tabelaAdminEquipe").querySelector("tbody");
+  tbody.innerHTML = state.employees
+    .slice().sort((a,b)=>a.nome.localeCompare(b.nome))
+    .map((emp) => `
+      <tr>
+        <td>${emp.nome}</td>
+        <td>${emp.cargo}</td>
+        <td><button class="danger" onclick="removerServidor('${emp.nome.replace(/'/g,"\\'")}')">Remover</button></td>
+      </tr>
+    `).join("");
+}
+
+function renderAdminEscala() {
+  const turno = byId("adminTurno").value;
+  const dia = byId("adminDia").value;
+  const tbody = byId("tabelaAdminEscala").querySelector("tbody");
+  const rows = (((state.scale||{})[turno]||{})[dia]||[]);
+  tbody.innerHTML = rows.map((item, idx) => `
+    <tr>
+      <td>${item[0]}</td>
+      <td>${getCargo(item[0])}</td>
+      <td>${item[1]}</td>
+      <td><button class="danger" onclick="removerDaEscala('${turno}','${dia}',${idx})">Remover</button></td>
+    </tr>
+  `).join("") || '<tr><td colspan="4">Nenhum servidor neste dia/turno.</td></tr>';
+}
+
+function makeCode() {
+  return "PED-" + Date.now().toString().slice(-8);
+}
+
+function limparRegistro() {
+  byId("tipoOcorrencia").value = "Abono";
+  byId("localTrabalho").selectedIndex = 0;
+  byId("dataInicial").value = "";
+  byId("dataFinal").value = "";
+  byId("turno").value = "Manhã";
+  byId("cobertura").value = "";
+  byId("observacoes").value = "";
+  byId("codigoPedido").value = makeCode();
+  registroEditandoId = null;
+  byId("btnSalvarRegistro").textContent = "Salvar pedido";
+}
+
+function montarPayloadDoFormulario() {
+  const nome = byId("servidorSelect").value;
+  const cargo = getCargo(nome);
+  return {
+    id: registroEditandoId || cryptoRandomId(),
+    codigo: byId("codigoPedido").value || makeCode(),
+    nome,
+    cargo,
+    emailServidor: byId("emailServidor").value.trim(),
+    ocorrencia: byId("tipoOcorrencia").value,
+    localTrabalho: byId("localTrabalho").value,
+    dataInicial: byId("dataInicial").value,
+    dataFinal: byId("dataFinal").value || byId("dataInicial").value,
+    turno: byId("turno").value,
+    cobertura: byId("cobertura").value.trim(),
+    observacoes: byId("observacoes").value.trim(),
+    status: "Ativo",
+    timestamp: new Date().toLocaleString("pt-BR"),
+    historico: []
+  };
+}
+
+function cryptoRandomId() {
+  return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+async function salvarRegistro() {
+  const payload = montarPayloadDoFormulario();
+  if (!payload.dataInicial) {
+    showStatus(byId("statusRegistro"), "Informe a data inicial.", false);
+    return null;
+  }
+
+  try {
+    let result;
+
+    if (registroEditandoId) {
+      const idx = registros.findIndex(r => r.id === registroEditandoId);
+      if (idx >= 0) {
+        payload.historico = (registros[idx].historico || []).concat([{
+          acao: "Alterado",
+          em: new Date().toLocaleString("pt-BR")
+        }]);
+        payload.status = "Alterado";
+        registros[idx] = payload;
+      }
+
+      result = await postToWebApp({
+        action: "updateRegistro",
+        ...payload
+      });
+
+      logEvento("alteracao", { codigo: payload.codigo, nome: payload.nome });
+    } else {
+      registros.push(payload);
+
+      result = await postToWebApp({
+        action: "saveRegistro",
+        ...payload
+      });
+
+      logEvento("inclusao", { codigo: payload.codigo, nome: payload.nome });
+    }
+
+    if (!result || !result.ok) {
+      showStatus(byId("statusRegistro"), (result && result.error) || "Erro ao enviar para a planilha.", false);
+      return null;
+    }
+
+    saveRegistros();
+    renderSolicitacoesPessoa();
+    renderIndicadoresAdmin();
+    clearStatus(byId("statusRegistro"));
+    return payload;
+  } catch (error) {
+    showStatus(byId("statusRegistro"), "Erro de conexão com a planilha Google.", false);
+    return null;
+  }
+}
+
+function preencherFormularioComRegistro(id) {
+  const r = registros.find(x => x.id === id);
+  if (!r) return;
+  byId("servidorSelect").value = r.nome;
+  syncCargoAuto();
+  byId("emailServidor").value = r.emailServidor || "";
+  byId("tipoOcorrencia").value = r.ocorrencia;
+  byId("localTrabalho").value = r.localTrabalho;
+  byId("dataInicial").value = r.dataInicial;
+  byId("dataFinal").value = r.dataFinal;
+  byId("turno").value = r.turno;
+  byId("cobertura").value = r.cobertura || "";
+  byId("observacoes").value = r.observacoes || "";
+  byId("codigoPedido").value = r.codigo || "";
+  registroEditandoId = r.id;
+  byId("btnSalvarRegistro").textContent = "Salvar alteração";
+  document.querySelector('[data-tab="registro"]').click();
+  showStatus(byId("statusRegistro"), "Registro carregado para alteração.");
+}
+
+async function excluirRegistro(id) {
+  const r = registros.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm("Deseja excluir este registro?")) return;
+
+  try {
+    const result = await postToWebApp({
+      action: "deleteRegistro",
+      id: r.id
+    });
+
+    if (!result || !result.ok) {
+      showStatus(byId("statusSolicitacoes"), (result && result.error) || "Erro ao excluir na planilha.", false);
+      return;
+    }
+
+    r.status = "Excluído";
+    r.historico = (r.historico || []).concat([{
+      acao: "Excluído",
+      em: new Date().toLocaleString("pt-BR")
+    }]);
+
+    saveRegistros();
+    logEvento("exclusao", { codigo: r.codigo, nome: r.nome });
+    renderSolicitacoesPessoa();
+    renderIndicadoresAdmin();
+    showStatus(byId("statusSolicitacoes"), "Registro excluído com sucesso.");
+  } catch (error) {
+    showStatus(byId("statusSolicitacoes"), "Erro de conexão com a planilha Google.", false);
+  }
+}
+
+async function abrirEmailDoRegistro(r, tipoMensagem) {
+  const assuntoBase = tipoMensagem === "alteracao" ? "Alteração de solicitação" : tipoMensagem === "exclusao" ? "Exclusão de solicitação" : "Solicitação registrada";
+  const subject = `${assuntoBase} - ${r.nome} - ${r.codigo}`;
+  const body = `Prezado(a),
+
+Segue ${tipoMensagem === "alteracao" ? "a alteração" : tipoMensagem === "exclusao" ? "a exclusão" : "o registro"} da solicitação.
+
+Código: ${r.codigo}
+Servidor: ${r.nome}
+Cargo: ${r.cargo}
+Ocorrência: ${r.ocorrencia}
+Período: ${r.dataInicial} a ${r.dataFinal}
+Turno: ${r.turno}
+Local previsto: ${r.localTrabalho}
+Cobertura: ${r.cobertura || "-"}
+Status: ${r.status}
+Observações: ${r.observacoes || "-"}
+
+Mensagem gerada pelo sistema de gestão do setor UDI.`;
+
+  return await postToWebApp({
+    action: "sendEmail",
+    to: r.emailServidor,
+    cc: COPY_EMAIL,
+    subject,
+    body,
+    codigo: r.codigo,
+    nome: r.nome
+  });
+}
+
+async function salvarEAbrirEmail() {
+  const estavaEditando = !!registroEditandoId;
+  const payload = await salvarRegistro();
+  if (!payload) return;
+
+  if (!payload.emailServidor) {
+    showStatus(byId("statusRegistro"), "Pedido salvo, mas informe o e-mail do servidor para enviar a mensagem.", false);
+    return;
+  }
+
+  try {
+    const result = await abrirEmailDoRegistro(payload, estavaEditando ? "alteracao" : "inclusao");
+    if (!result || !result.ok) {
+      showStatus(byId("statusRegistro"), (result && result.error) || "Pedido salvo, mas houve erro no envio do e-mail.", false);
+      return;
+    }
+    showStatus(byId("statusRegistro"), "Pedido salvo e e-mail enviado.");
+    limparRegistro();
+  } catch (error) {
+    showStatus(byId("statusRegistro"), "Pedido salvo, mas houve erro no envio do e-mail.", false);
+  }
+}
+
+function renderSolicitacoesPessoa() {
+  const servidor = byId("filtroServidorSolicitacoes").value;
+  const statusFiltro = byId("filtroStatusSolicitacoes").value;
+  const tbody = byId("tabelaSolicitacoesPessoa").querySelector("tbody");
+  const lista = registros
+    .filter(r => (!servidor || r.nome === servidor) && (!statusFiltro || r.status === statusFiltro))
+    .sort((a,b) => {
+      const da = new Date((a.dataInicial || "1900-01-01") + "T00:00:00");
+      const db = new Date((b.dataInicial || "1900-01-01") + "T00:00:00");
+      return db - da;
+    });
+
+  tbody.innerHTML = lista.map(r => `
+    <tr>
+      <td>${r.codigo || ""}</td>
+      <td>${r.timestamp || ""}</td>
+      <td>${r.ocorrencia}</td>
+      <td>${r.dataInicial} a ${r.dataFinal}</td>
+      <td>${r.turno}</td>
+      <td>${r.localTrabalho}</td>
+      <td>${r.status || "Ativo"}</td>
+      <td>${r.emailServidor || ""}</td>
+      <td>${r.observacoes || ""}</td>
+      <td>
+        <div class="actions" style="margin-top:0">
+          <button class="secondary" onclick="editarRegistro('${r.id}')">Alterar</button>
+          <button class="danger" onclick="excluirRegistro('${r.id}')">Excluir</button>
+          <button class="secondary" onclick="reenviarEmail('${r.id}')">E-mail</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || '<tr><td colspan="10">Nenhum pedido encontrado para o filtro selecionado.</td></tr>';
+}
+window.editarRegistro = preencherFormularioComRegistro;
+window.excluirRegistro = excluirRegistro;
+window.reenviarEmail = async function(id){
+  const r = registros.find(x => x.id === id);
+  if (!r) return;
+  if (!r.emailServidor) {
+    showStatus(byId("statusSolicitacoes"), "Este registro não possui e-mail cadastrado.", false);
+    return;
+  }
+
+  try {
+    const result = await abrirEmailDoRegistro(r, r.status === "Excluído" ? "exclusao" : r.status === "Alterado" ? "alteracao" : "inclusao");
+    if (!result || !result.ok) {
+      showStatus(byId("statusSolicitacoes"), (result && result.error) || "Erro ao enviar e-mail.", false);
+      return;
+    }
+    showStatus(byId("statusSolicitacoes"), "E-mail enviado com sucesso.");
+  } catch (error) {
+    showStatus(byId("statusSolicitacoes"), "Erro de conexão ao enviar e-mail.", false);
+  }
+};
+
+function filtrarEventosPorPeriodo() {
+  const ini = byId("adminPeriodoInicio").value;
+  const fim = byId("adminPeriodoFim").value;
+  return acessos.filter(e => {
+    const d = e.dataISO.slice(0,10);
+    return (!ini || d >= ini) && (!fim || d <= fim);
+  });
+}
+
+function renderIndicadoresAdmin() {
+  const lista = filtrarEventosPorPeriodo();
+  byId("kpiAcessosAdmin").textContent = lista.filter(x => x.tipo === "login_admin").length;
+  byId("kpiInclusoes").textContent = lista.filter(x => x.tipo === "inclusao").length;
+  byId("kpiAlteracoes").textContent = lista.filter(x => x.tipo === "alteracao").length;
+  byId("kpiExclusoes").textContent = lista.filter(x => x.tipo === "exclusao").length;
+}
+
+function entrarAdmin() {
+  const senha = byId("senhaAdmin").value;
+  if (senha !== ADMIN_PASSWORD) {
+    showStatus(byId("statusAdminLogin"), "Senha incorreta.", false);
+    return;
+  }
+  adminLogado = true;
+  byId("blocoLoginAdmin").classList.add("hidden");
+  byId("painelAdminConteudo").classList.remove("hidden");
+  logEvento("login_admin");
+  renderAdminEquipe();
+  renderAdminEscala();
+  renderIndicadoresAdmin();
+  clearStatus(byId("statusAdminLogin"));
+}
+
+function sairAdmin() {
+  adminLogado = false;
+  byId("senhaAdmin").value = "";
+  byId("painelAdminConteudo").classList.add("hidden");
+  byId("blocoLoginAdmin").classList.remove("hidden");
+}
+
+function adicionarServidor() {
+  const nome = byId("novoNome").value.trim();
+  const cargo = byId("novoCargo").value.trim();
+  if (!nome || !cargo) return;
+  if (state.employees.some(e => e.nome.toLowerCase() === nome.toLowerCase())) {
+    showStatus(byId("statusAdminSalvar"), "Este servidor já existe.", false);
+    return;
+  }
+  state.employees.push({ nome, cargo });
+  byId("novoNome").value = "";
+  byId("novoCargo").value = "";
+  saveStateLocal();
+  fillSelectOptions();
+  renderEquipe();
+  renderAdminEquipe();
+  renderAdminEscala();
+  renderEscalaDia();
+  renderResumoSemanal();
+  showStatus(byId("statusAdminSalvar"), "Servidor adicionado.");
+}
+
+function removerServidor(nome) {
+  if (!confirm("Remover " + nome + " da equipe?")) return;
+  state.employees = state.employees.filter(e => e.nome !== nome);
+  Object.keys(state.scale).forEach(turno => {
+    Object.keys(state.scale[turno]).forEach(dia => {
+      state.scale[turno][dia] = state.scale[turno][dia].filter(item => item[0] !== nome);
+    });
+  });
+  saveStateLocal();
+  fillSelectOptions();
+  renderEquipe();
+  renderAdminEquipe();
+  renderAdminEscala();
+  renderEscalaDia();
+  renderResumoSemanal();
+  showStatus(byId("statusAdminSalvar"), "Servidor removido e retirado das escalas.");
+}
+window.removerServidor = removerServidor;
+
+function adicionarEscala() {
+  const turno = byId("adminTurno").value;
+  const dia = byId("adminDia").value;
+  const nome = byId("adminServidor").value;
+  const local = byId("adminLocal").value.trim();
+  if (!nome || !local) {
+    showStatus(byId("statusAdminSalvar"), "Informe servidor e local/atividade.", false);
+    return;
+  }
+  state.scale[turno] = state.scale[turno] || {};
+  state.scale[turno][dia] = state.scale[turno][dia] || [];
+  state.scale[turno][dia].push([nome, local]);
+  byId("adminLocal").value = "";
+  saveStateLocal();
+  renderAdminEscala();
+  renderEscalaDia();
+  renderResumoSemanal();
+  showStatus(byId("statusAdminSalvar"), "Escala adicionada.");
+}
+
+function removerDaEscala(turno, dia, idx) {
+  state.scale[turno][dia].splice(idx,1);
+  saveStateLocal();
+  renderAdminEscala();
+  renderEscalaDia();
+  renderResumoSemanal();
+  showStatus(byId("statusAdminSalvar"), "Item removido da escala.");
+}
+window.removerDaEscala = removerDaEscala;
+
+async function salvarTudo() {
+  state.referenciaEscala = byId("escalaReferencia").value.trim() || "Semana padrão";
+  saveStateLocal();
+
+  try {
+    const result = await postToWebApp({
+      action: "saveEquipeEscala",
+      adminPassword: ADMIN_PASSWORD,
+      employees: state.employees,
+      scale: state.scale,
+      referenciaEscala: state.referenciaEscala
+    });
+
+    if (!result || !result.ok) {
+      showStatus(byId("statusAdminSalvar"), (result && result.error) || "Erro ao salvar equipe e escala na planilha.", false);
+      return;
+    }
+
+    showStatus(byId("statusAdminSalvar"), "Equipe e escala salvas na planilha Google.");
+  } catch (error) {
+    showStatus(byId("statusAdminSalvar"), "Erro de conexão com a planilha Google.", false);
+  }
+}
+
+function bindTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      btn.classList.add("active");
+      byId(btn.dataset.tab).classList.add("active");
+    });
+  });
+}
+
+function init() {
+  bindTabs();
+  fillSelectOptions();
+  renderEquipe();
+  renderEscalaDia();
+  renderResumoSemanal();
+  renderSolicitacoesPessoa();
+  limparRegistro();
+
+  byId("servidorSelect").addEventListener("change", ()=>{ syncCargoAuto(); syncEmailAuto(); });
+  byId("buscaEquipe").addEventListener("input", renderEquipe);
+  byId("filtroCargoEquipe").addEventListener("change", renderEquipe);
+  byId("btnSalvarRegistro").addEventListener("click", async () => {
+    const payload = await salvarRegistro();
+    if (payload) {
+      showStatus(byId("statusRegistro"), registroEditandoId ? "Alteração salva." : "Pedido salvo com sucesso.");
+      limparRegistro();
+    }
+  });
+  byId("btnEnviarEmail").addEventListener("click", async () => { await salvarEAbrirEmail(); });
+  byId("btnLimparRegistro").addEventListener("click", limparRegistro);
+  byId("btnAtualizarSolicitacoes").addEventListener("click", renderSolicitacoesPessoa);
+  byId("filtroServidorSolicitacoes").addEventListener("change", renderSolicitacoesPessoa);
+  byId("filtroStatusSolicitacoes").addEventListener("change", renderSolicitacoesPessoa);
+
+  byId("btnRenderEscala").addEventListener("click", () => {
+    state.referenciaEscala = byId("escalaReferencia").value;
+    saveStateLocal();
+    renderEscalaDia();
+    renderResumoSemanal();
+  });
+  byId("filtroTurnoEscala").addEventListener("change", renderEscalaDia);
+  byId("filtroDiaEscala").addEventListener("change", renderEscalaDia);
+
+  byId("btnEntrarAdmin").addEventListener("click", entrarAdmin);
+  byId("btnSairAdmin").addEventListener("click", sairAdmin);
+  byId("btnAdicionarServidor").addEventListener("click", adicionarServidor);
+  byId("btnAdicionarEscala").addEventListener("click", adicionarEscala);
+  byId("btnSalvarTudo").addEventListener("click", salvarTudo);
+  byId("adminTurno").addEventListener("change", renderAdminEscala);
+  byId("adminDia").addEventListener("change", renderAdminEscala);
+  byId("btnAplicarPeriodoAdmin").addEventListener("click", renderIndicadoresAdmin);
+}
+init();
+</script>
+</body>
+</html>
